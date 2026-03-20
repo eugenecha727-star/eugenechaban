@@ -636,6 +636,20 @@ footer a:hover { color: var(--orange); }
 </footer>
 
 <script>
+const TG_BOT_TOKEN = 'PASTE_YOUR_TOKEN_HERE';
+const TG_CHAT_ID = '8416449711';
+
+async function sendTelegramNotification(name, email, country) {
+  const text = `🔥 Новый лид!\n\n👤 Имя: ${name}\n📧 Email: ${email}\n🌍 Страна: ${country}\n\n📊 Источник: 7-Day Abs Plan сайт`;
+  try {
+    await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: TG_CHAT_ID, text, parse_mode: 'HTML' })
+    });
+  } catch(e) { console.log('TG error:', e); }
+}
+
 function handleForm(formId, contentId, successId) {
   const form = document.getElementById(formId);
   if (!form) return;
@@ -644,6 +658,9 @@ function handleForm(formId, contentId, successId) {
     const btn = form.querySelector('.submit-btn');
     btn.textContent = 'Sending...';
     btn.disabled = true;
+    const name = form.querySelector('[name="name"]')?.value || 'Unknown';
+    const email = form.querySelector('[name="email"]')?.value || 'Unknown';
+    const country = form.querySelector('[name="country"]')?.value || 'Unknown';
     try {
       const res = await fetch(form.action, {
         method: 'POST',
@@ -653,6 +670,7 @@ function handleForm(formId, contentId, successId) {
       if (res.ok) {
         document.getElementById(contentId).style.display = 'none';
         document.getElementById(successId).style.display = 'block';
+        sendTelegramNotification(name, email, country);
       } else {
         btn.textContent = 'Try again';
         btn.disabled = false;
